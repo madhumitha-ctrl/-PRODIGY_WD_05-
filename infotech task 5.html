@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        input, button { margin: 10px 0; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Weather App 🌦️</h2>
+        <input type="text" id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+        <button onclick="getLocationWeather()">Use My Location</button>
+        <div id="weather"></div>
+    </div>
+
+    <script>
+        const apiKey = 'd6e13222a0d8c49533a32396985b24da'; 
+
+        function getWeather() {
+            const city = document.getElementById('city').value;
+            if (!city) return alert('Please enter a city name.');
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // Debugging output
+                    displayWeather(data);
+                })
+                .catch(error => console.error('Error fetching weather:', error));
+        }
+
+        function getLocationWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data); // Debugging output
+                            displayWeather(data);
+                        })
+                        .catch(error => console.error('Error fetching location weather:', error));
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function displayWeather(data) {
+            if (data.cod !== 200) {
+                document.getElementById('weather').innerHTML = `<p>${data.message}</p>`;
+                return;
+            }
+            document.getElementById('weather').innerHTML = `
+                <h3>${data.name}, ${data.sys.country}</h3>
+                <p>Temperature: ${data.main.temp}°C</p>
+                <p>Weather: ${data.weather[0].description}</p>
+                <p>Humidity: ${data.main.humidity}%</p>
+                <p>Wind Speed: ${data.wind.speed} m/s</p>
+            `;
+        }
+    </script>
+</body>
+</html>    
